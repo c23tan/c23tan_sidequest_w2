@@ -8,6 +8,8 @@ GBDA302 Week 2 Example 3: Platforms (AABB Collisions)
 
 Karen Cochrane and David Han
 
+Edited by: Caitlyn Tan | c23tan | 21088383
+
 ---
 
 ## Description
