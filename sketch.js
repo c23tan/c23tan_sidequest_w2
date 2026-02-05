@@ -38,6 +38,9 @@ let platforms = [];
 // Clouds
 let clouds = [];
 
+// Mischief balls
+let balls = [];
+
 function setup() {
   createCanvas(640, 360);
 
@@ -64,6 +67,20 @@ function setup() {
       s: random(0.8, 1.3),
       speed: random(0.2, 0.5),
     });
+  }
+
+  // Place balls on platforms
+  for (const p of platforms) {
+    if (p !== platforms[0]) {
+      // skip ground
+      balls.push({
+        x: p.x + p.w / 2,
+        y: p.y - 10,
+        r: 10,
+        vx: random(-1, 1),
+        vy: 0,
+      });
+    }
   }
 
   blob3.y = floorY3 - blob3.r - 1;
@@ -139,13 +156,61 @@ function draw() {
   // Ease wobble
   blob3.wobble = lerp(blob3.wobble, 10, 0.1);
 
+  // --- Draw balls ---
+  for (const ball of balls) {
+    ball.vy += 0.4; // gravity
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    // Collision with platforms
+    for (const p of platforms) {
+      if (
+        ball.x + ball.r > p.x &&
+        ball.x - ball.r < p.x + p.w &&
+        ball.y + ball.r > p.y &&
+        ball.y + ball.r < p.y + p.h &&
+        ball.vy > 0
+      ) {
+        ball.y = p.y - ball.r;
+        ball.vy *= -0.3; // bounce
+        ball.vx *= 0.9; // friction
+      }
+    }
+
+    // Collision with blob
+    const dx = ball.x - blob3.x;
+    const dy = ball.y - blob3.y;
+    const distB = sqrt(dx * dx + dy * dy);
+    if (distB < blob3.r + ball.r) {
+      const angle = atan2(dy, dx);
+      const force = 3;
+      ball.vx += cos(angle) * force;
+      ball.vy += sin(angle) * force;
+
+      blob3.wobble = 18; // playful kick wobble
+    }
+
+    // Keep balls inside canvas horizontally
+    if (ball.x < ball.r) {
+      ball.x = ball.r;
+      ball.vx *= -0.5;
+    } else if (ball.x > width - ball.r) {
+      ball.x = width - ball.r;
+      ball.vx *= -0.5;
+    }
+
+    // Draw balls
+    fill(200, 180, 255);
+    ellipse(ball.x, ball.y, ball.r * 2);
+  }
+
   // Draw blob
   blob3.t += blob3.tSpeed;
   drawBlobCircle(blob3);
 
   // HUD
   fill(120);
-  text("Excited / Happy Mode 💕  Float through the clouds", 10, 18);
+  text("Excited / Happy Mode 💕 Mischief time!", 10, 18);
 }
 
 // ---- Clouds ----
